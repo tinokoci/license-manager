@@ -24,9 +24,9 @@ import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 @Getter
-public class Soteria {
+public enum Soteria {
 
-    public static final Soteria INSTANCE = new Soteria();
+    INSTANCE;
 
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()

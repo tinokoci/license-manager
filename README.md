@@ -13,14 +13,14 @@ A simple implementation example can be seen below:
 public class ImplementationExample {
 
     public static void main(String[] args) {
-        if (checkLicense("C5NPG5M922GLPG0J6NM77GKVN7TC8IEH", "Soteria")) {
-            // Do stuff...
+        if (isLicenseValid("C5NPG5M922GLPG0J6NM77GKVN7TC8IEH", "Soteria")) {
+            // Load the application...
         } else {
             System.exit(1);
         }
     }
 
-    private static boolean checkLicense(String license, String software) {
+    private static boolean isLicenseValid(String license, String software) {
         try {
             URL url = new URL("http://localhost:8080/license?key=" + license + "&software=" + software);
 
@@ -57,9 +57,11 @@ public class ImplementationExample {
     }
 
     private static void respond(String... text) {
-        System.out.println(String.join("", Collections.nCopies(50, "#")));
+        String line = String.join("", Collections.nCopies(50, "#"));
+
+        System.out.println(line);
         Stream.of(text).forEach(System.out::println);
-        System.out.println(String.join("", Collections.nCopies(50, "#")));
+        System.out.println(line);
     }
 }
 ```

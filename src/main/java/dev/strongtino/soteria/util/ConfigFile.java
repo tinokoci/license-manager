@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.SQLOutput;
 import java.util.Properties;
 
 public class ConfigFile {
@@ -22,8 +23,9 @@ public class ConfigFile {
 
         File directory = new File(DIRECTORY);
 
-        if (!directory.exists()) {
-            directory.mkdir();
+        if (!directory.exists() && !directory.mkdir()) {
+            System.out.println("Couldn't create the " + DIRECTORY + "directory");
+            System.exit(1);
         }
         File file = new File(DIRECTORY + File.separator + FILE);
 
@@ -37,14 +39,18 @@ public class ConfigFile {
                 while ((data = in.read()) != -1) {
                     out.write(data);
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         properties = new Properties();
 
         try {
             FileInputStream stream = new FileInputStream(DIRECTORY + File.separator + FILE);
             properties.load(stream);
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         initialized = true;
     }

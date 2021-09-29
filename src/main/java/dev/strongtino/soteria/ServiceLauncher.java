@@ -7,10 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ServiceLauncher {
 
 	public static void main(String[] args) {
-		// Web server
 		SpringApplication.run(ServiceLauncher.class);
-
-		// Discord bot
 		Soteria.INSTANCE.start();
 	}
 }

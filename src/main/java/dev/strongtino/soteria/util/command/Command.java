@@ -5,12 +5,7 @@ import dev.strongtino.soteria.util.Task;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -56,55 +51,57 @@ public class Command extends ListenerAdapter {
     }
 
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        if (commandType == CommandType.GUILD) {
-            Message message = event.getMessage();
-            TextChannel channel = event.getChannel();
-            Member member = message.getMember();
+        if (commandType != CommandType.GUILD) return;
 
-            if (member == null || member.getUser().isBot() || (permission != null && !member.hasPermission(permission)))
-                return;
+        Message message = event.getMessage();
+        TextChannel channel = event.getChannel();
+        Member member = message.getMember();
 
-            String[] args = getArguments(message);
+        if (member == null
+                || member.getUser().isBot()
+                || (permission != null && !member.hasPermission(permission)))
+            return;
 
-            if (args != null) {
-                guild = message.getGuild();
+        String[] args = getArguments(message);
 
-                if (async) Task.async(() -> execute(member, channel, message, args));
-                else execute(member, channel, message, args);
-            }
-        }
+        if (args == null) return;
+
+        guild = message.getGuild();
+
+        if (async) Task.async(() -> execute(member, channel, message, args));
+        else execute(member, channel, message, args);
     }
 
     public void onPrivateMessageReceived(@NotNull PrivateMessageReceivedEvent event) {
-        if (commandType == CommandType.PRIVATE) {
-            Message message = event.getMessage();
-            PrivateChannel channel = event.getChannel();
-            User user = event.getAuthor();
+        if (commandType != CommandType.PRIVATE) return;
 
-            if (user.isBot()) return;
+        Message message = event.getMessage();
+        PrivateChannel channel = event.getChannel();
+        User user = event.getAuthor();
 
-            String[] args = getArguments(message);
+        if (user.isBot()) return;
 
-            if (args != null) {
-                if (async) Task.async(() -> execute(user, channel, message, args));
-                else execute(user, channel, message, args);
-            }
-        }
+        String[] args = getArguments(message);
+
+        if (args == null) return;
+
+        if (async) Task.async(() -> execute(user, channel, message, args));
+        else execute(user, channel, message, args);
     }
 
     private String[] getArguments(Message message) {
         String[] originalArray = message.getContentRaw().split(" ");
         String[] newArray = Arrays.copyOfRange(originalArray, command == null ? 0 : 1, originalArray.length);
 
-        if (command == null || originalArray[0].equalsIgnoreCase(PREFIX + command) || (!aliases.isEmpty() && aliases.stream().anyMatch(alias -> originalArray[0].equalsIgnoreCase(PREFIX + alias)))) {
+        if (command == null
+                || originalArray[0].equalsIgnoreCase(PREFIX + command)
+                || (!aliases.isEmpty() && aliases.stream().anyMatch(alias -> originalArray[0].equalsIgnoreCase(PREFIX + alias)))) {
             return newArray;
         }
         return null;
     }
 
-    public void execute(Member member, TextChannel channel, Message message, String[] args) {
-    }
+    public void execute(Member member, TextChannel channel, Message message, String[] args) {}
 
-    public void execute(User user, PrivateChannel channel, Message message, String[] args) {
-    }
+    public void execute(User user, PrivateChannel channel, Message message, String[] args) {}
 }
