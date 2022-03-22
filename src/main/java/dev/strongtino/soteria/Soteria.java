@@ -7,7 +7,9 @@ import com.google.gson.LongSerializationPolicy;
 import dev.strongtino.soteria.command.LicenseCommand;
 import dev.strongtino.soteria.command.RequestsCommand;
 import dev.strongtino.soteria.command.SoftwareCommand;
+import dev.strongtino.soteria.database.Credentials;
 import dev.strongtino.soteria.database.DatabaseService;
+import dev.strongtino.soteria.database.impl.MongoDatabaseService;
 import dev.strongtino.soteria.license.LicenseService;
 import dev.strongtino.soteria.license.request.RequestService;
 import dev.strongtino.soteria.software.SoftwareService;
@@ -27,6 +29,8 @@ import java.util.stream.Stream;
 public enum Soteria {
 
     INSTANCE;
+
+    public static final String APPLICATION_NAME = "Soteria";
 
     public static final Gson GSON = new GsonBuilder()
             .serializeNulls()
@@ -66,7 +70,9 @@ public enum Soteria {
 
     private void loadServices() {
         executorService = Executors.newCachedThreadPool();
-        databaseService = new DatabaseService();
+        databaseService = new MongoDatabaseService().connect(Credentials.builder()
+                .url(config.getString("mongodb-url"))
+                .build());
         licenseService = new LicenseService();
         requestService = new RequestService();
         softwareService = new SoftwareService();

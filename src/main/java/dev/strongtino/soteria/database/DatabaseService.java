@@ -1,55 +1,79 @@
 package dev.strongtino.soteria.database;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.UpdateOptions;
-import com.mongodb.lang.Nullable;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import dev.strongtino.soteria.Soteria;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class DatabaseService {
+public interface DatabaseService {
 
-    private final MongoDatabase database;
+    /**
+     * Establishes a connection to the database
+     *
+     * @param credentials connection information
+     * @return database service with a new established connection
+     */
+    DatabaseService connect(Credentials credentials);
 
-    public DatabaseService() {
-        MongoClient client = new MongoClient(new ServerAddress(
-                Soteria.INSTANCE.getConfig().getString("mongo-address"),
-                Soteria.INSTANCE.getConfig().getInteger("mongo-port")
-        ));
-        database = client.getDatabase(Soteria.INSTANCE.getConfig().getString("mongo-database"));
-    }
+    /**
+     * Inserts a document to a collection
+     *
+     * @param collection where to insert the document
+     * @param document to insert
+     */
+    void insert(String collection, Document document);
 
-    public void insertDocument(String collection, Document document) {
-        database.getCollection(collection).insertOne(document);
-    }
+    /**
+     * Updates a document inside a collection
+     *
+     * @param collection where the document to update is located
+     * @param query to find the document with
+     * @param document that will replace the one found
+     * @return the result of the operation
+     */
+    UpdateResult update(String collection, Bson query, Document document);
 
-    public void updateDocument(String collection, String key, Object value, Document document) {
-        database.getCollection(collection).replaceOne(Filters.eq(key, value), document, new UpdateOptions().upsert(true));
-    }
+    /**
+     * Deletes a document from a collection
+     *
+     * @param collection where the document to delete is located
+     * @param query to find the document with
+     * @return the result of the operation
+     */
+    DeleteResult delete(String collection, Bson query);
 
-    public void deleteDocument(String collection, String key, String value) {
-        database.getCollection(collection).deleteOne(Filters.eq(key, value));
-    }
+    /**
+     * Finds a document from a collection
+     *
+     * @param collection where the document to find is located
+     * @param query to find the document with
+     * @return an Optional with the found document if it exists in
+     * the collection or an empty Optional if no document is found
+     */
+    Optional<Document> findOne(String collection, Bson query);
 
-    public List<Document> getDocuments(String collection, String key, String value) {
-        return database.getCollection(collection).find(Filters.eq(key, value)).into(new ArrayList<>());
-    }
+    /**
+     * Fetches all data from a specific collection in the database
+     *
+     * @param collection from where to fetch all documents
+     * @param query to find the documents with
+     * @return found documents inside a list
+     */
+    List<Document> findAll(String collection, Bson query);
 
-    public List<Document> getDocuments(String collection) {
-        return database.getCollection(collection).find().into(new ArrayList<>());
-    }
+    /**
+     * Fetches all data from a specific collection in the database
+     *
+     * @param collection from where to fetch all documents
+     * @return found documents inside a list
+     */
+    List<Document> findAll(String collection);
 
-    public boolean exists(String collection, String key, Object value) {
-        return database.getCollection(collection).find(Filters.eq(key, value)).first() != null;
-    }
-
-    @Nullable
-    public Document getDocument(String collection, String key, String value) {
-        return database.getCollection(collection).find(Filters.eq(key, value)).first();
+    default String getDatabase() {
+        return Soteria.APPLICATION_NAME.toLowerCase();
     }
 }

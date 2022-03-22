@@ -1,5 +1,6 @@
 package dev.strongtino.soteria.software;
 
+import com.mongodb.client.model.Filters;
 import dev.strongtino.soteria.Soteria;
 import dev.strongtino.soteria.util.DatabaseUtil;
 import dev.strongtino.soteria.util.Task;
@@ -15,7 +16,7 @@ public class SoftwareService {
     private final Map<String, Software> softwareMap = new ConcurrentHashMap<>();
 
     public SoftwareService() {
-        Task.async(() -> Soteria.INSTANCE.getDatabaseService().getDocuments(DatabaseUtil.COLLECTION_SOFTWARE)
+        Task.async(() -> Soteria.INSTANCE.getDatabaseService().findAll(DatabaseUtil.COLLECTION_SOFTWARE)
                 .stream()
                 .map(document -> Soteria.GSON.fromJson(document.toJson(), Software.class))
                 .forEach(this::addSoftwareToMap)
@@ -28,7 +29,7 @@ public class SoftwareService {
         }
         Software software = new Software(name);
 
-        Soteria.INSTANCE.getDatabaseService().insertDocument(DatabaseUtil.COLLECTION_SOFTWARE, Document.parse(Soteria.GSON.toJson(software)));
+        Soteria.INSTANCE.getDatabaseService().insert(DatabaseUtil.COLLECTION_SOFTWARE, Document.parse(Soteria.GSON.toJson(software)));
         addSoftwareToMap(software);
 
         return software;
@@ -40,7 +41,7 @@ public class SoftwareService {
 
         if (software == null) return false;
 
-        Soteria.INSTANCE.getDatabaseService().deleteDocument(DatabaseUtil.COLLECTION_SOFTWARE, "_id", software.getName());
+        Soteria.INSTANCE.getDatabaseService().delete(DatabaseUtil.COLLECTION_SOFTWARE, Filters.eq("_id", software.getName()));
         softwareMap.remove(name);
 
         return true;

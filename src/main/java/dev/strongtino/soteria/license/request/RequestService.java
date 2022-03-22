@@ -1,5 +1,6 @@
 package dev.strongtino.soteria.license.request;
 
+import com.mongodb.client.model.Filters;
 import dev.strongtino.soteria.Soteria;
 import dev.strongtino.soteria.license.LicenseController;
 import dev.strongtino.soteria.software.Software;
@@ -30,26 +31,26 @@ public class RequestService {
         Task.async(() -> {
             Request request = new Request(getRequestsByAddress(address).size() + 1, address, key, software, System.currentTimeMillis(), type);
 
-            Soteria.INSTANCE.getDatabaseService().insertDocument(DatabaseUtil.COLLECTION_REQUESTS, Document.parse(Soteria.GSON.toJson(request)));
+            Soteria.INSTANCE.getDatabaseService().insert(DatabaseUtil.COLLECTION_REQUESTS, Document.parse(Soteria.GSON.toJson(request)));
         });
     }
 
     public List<Request> getRequestsByAddress(String address) {
-        return Soteria.INSTANCE.getDatabaseService().getDocuments(DatabaseUtil.COLLECTION_REQUESTS, "address", address)
+        return Soteria.INSTANCE.getDatabaseService().findAll(DatabaseUtil.COLLECTION_REQUESTS, Filters.eq("address", address))
                 .stream()
                 .map(document -> Soteria.GSON.fromJson(document.toJson(), Request.class))
                 .collect(Collectors.toList());
     }
 
     public List<Request> getRequestsBySoftware(Software software) {
-        return Soteria.INSTANCE.getDatabaseService().getDocuments(DatabaseUtil.COLLECTION_REQUESTS, "software", software.getName())
+        return Soteria.INSTANCE.getDatabaseService().findAll(DatabaseUtil.COLLECTION_REQUESTS, Filters.eq("software", software.getName()))
                 .stream()
                 .map(document -> Soteria.GSON.fromJson(document.toJson(), Request.class))
                 .collect(Collectors.toList());
     }
 
     public List<Request> getRequestsByKey(String key) {
-        return Soteria.INSTANCE.getDatabaseService().getDocuments(DatabaseUtil.COLLECTION_REQUESTS, "key", key)
+        return Soteria.INSTANCE.getDatabaseService().findAll(DatabaseUtil.COLLECTION_REQUESTS, Filters.eq("key", key))
                 .stream()
                 .map(document -> Soteria.GSON.fromJson(document.toJson(), Request.class))
                 .collect(Collectors.toList());

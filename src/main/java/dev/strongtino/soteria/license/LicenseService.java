@@ -1,5 +1,6 @@
 package dev.strongtino.soteria.license;
 
+import com.mongodb.client.model.Filters;
 import dev.strongtino.soteria.Soteria;
 import dev.strongtino.soteria.software.Software;
 import dev.strongtino.soteria.util.DatabaseUtil;
@@ -23,7 +24,7 @@ public class LicenseService {
     private final char[] possibleKeyCharactersArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
     public LicenseService() {
-        Task.async(() -> Soteria.INSTANCE.getDatabaseService().getDocuments(DatabaseUtil.COLLECTION_LICENSES)
+        Task.async(() -> Soteria.INSTANCE.getDatabaseService().findAll(DatabaseUtil.COLLECTION_LICENSES)
                 .stream()
                 .map(document -> Soteria.GSON.fromJson(document.toJson(), License.class))
                 .filter(License::isActive)
@@ -35,7 +36,7 @@ public class LicenseService {
     public License createLicense(String user, String product, long duration) {
         License license = new License(generateLicenseKey(), user, product, duration);
 
-        Soteria.INSTANCE.getDatabaseService().insertDocument(DatabaseUtil.COLLECTION_LICENSES, Document.parse(Soteria.GSON.toJson(license)));
+        Soteria.INSTANCE.getDatabaseService().insert(DatabaseUtil.COLLECTION_LICENSES, Document.parse(Soteria.GSON.toJson(license)));
         addLicenseToMap(license);
 
         return license;
@@ -45,7 +46,7 @@ public class LicenseService {
         license.setActive(false);
         license.setRevokedAt(System.currentTimeMillis());
 
-        Soteria.INSTANCE.getDatabaseService().updateDocument(DatabaseUtil.COLLECTION_LICENSES, "_id", license.getKey(), Document.parse(Soteria.GSON.toJson(license)));
+        Soteria.INSTANCE.getDatabaseService().update(DatabaseUtil.COLLECTION_LICENSES, Filters.eq("_id", license.getKey()), Document.parse(Soteria.GSON.toJson(license)));
     }
 
     @Nullable
@@ -100,7 +101,7 @@ public class LicenseService {
         String key = new String(keyCharactersArray);
 
         // 40+ digit number of permutations, but better worry than be sorry ya know
-        if (Soteria.INSTANCE.getDatabaseService().exists(DatabaseUtil.COLLECTION_LICENSES, "_id", key)) {
+        if (Soteria.INSTANCE.getDatabaseService().findOne(DatabaseUtil.COLLECTION_LICENSES, Filters.eq("_id", key)).isPresent()) {
             return generateLicenseKey();
         }
         return new String(keyCharactersArray);
