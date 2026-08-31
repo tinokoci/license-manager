@@ -1,4 +1,4 @@
-# Soteria (Refactor Planned Soon)
+# license-manager
 
 This is a system that allows you to manage licenses for various software. 
   
@@ -68,9 +68,3 @@ public class ImplementationExample {
 
 ### Warning
 You need to make sure to properly obfuscate your software because otherwise the licensing can be easily removed with a decompiler.
-
-### Contacts
-If you think that something could be improved, you can either create a pull request or contact me on one of the socials, I would highly appreciate that!  
-  
-Discord: **valentino#9447**  
-Twitter: **@strongtinofc**
